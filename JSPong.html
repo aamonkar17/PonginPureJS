@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 20; margin: 20; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="480" height="320"></canvas>
+
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    var x = Math.random() * 60 + 210;
+    var y = Math.random() * 60 + 130;
+    var dx = 1;
+    var dy = -1;
+    var ballRadius = 10;
+    var paddleHeight = 10;
+    var paddleWidth = 75;
+    var padX = (canvas.width-paddleWidth) / 2;
+    var paddleX = (canvas.width-paddleWidth) / 2;
+    var padY = (canvas.height-paddleWidth) / 2;
+    var paddleY = (canvas.height-paddleWidth) / 2;
+    var rightPressed = false;
+    var leftPressed = false;
+    var interval = setInterval(draw, 10);
+    var counter1 = 3;
+    var counter2 = 3;
+    var counter3 = 3;
+    var counter4 = 3;
+    
+    
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+    document.addEventListener("mousemove", mouseMoveHandler, false);
+    document.addEventListener("click", getClickPosition, false);
+    
+    function drawStart(width, height){
+        ctx.beginPath();
+        ctx.rect((canvas.width-width)/2, (canvas.height - height)/2, width, height);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+    function drawPaddle(xpos, ypos, width, height){
+        ctx.beginPath();
+        ctx.rect(xpos, ypos, width, height);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+    function keyDownHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = true;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = false;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = false;
+        }
+    }
+    function drawLives(lives, lives_x, lives_y) {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Lives Left: " + lives, lives_x, lives_y);
+    }
+    
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawStart(90, 60);
+        drawBall();
+        var paddle1 = drawPaddle(padX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+        drawLives(counter1, padX, canvas.height - 40);
+        
+        var paddle2 = drawPaddle(paddleX, 0, paddleWidth, paddleHeight);
+        drawLives(counter2, paddleX, 50);
+        
+        var paddle3 = drawPaddle(0, padY, paddleHeight, paddleWidth);
+        drawLives(counter3, 0, padY);
+        
+        var paddle4 = drawPaddle(canvas.width-paddleHeight, paddleY, paddleHeight, paddleWidth);
+        drawLives(counter4, canvas.width - 120, paddleY);
+        
+        x += dx;
+        y += dy;
+        
+        //bottom
+        if(y + dy > canvas.height-ballRadius) {
+            if(x > padX && x < padX + paddleWidth) {
+                dy = -dy;
+            }
+            else{
+                counter1--;
+                y = Math.random() * 20 + 250;
+                dy = -dy;
+            }
+        }
+        //top
+        else if(y + dy < ballRadius) {
+            if(x > paddleX && x < paddleX + paddleWidth) {
+                dy = -dy;
+            }
+            else {
+                counter2--;
+                y = Math.random() * 20 + 50;
+                dy = -dy;
+            }
+        }
+        //left
+        else if(x + dx < ballRadius) {
+            if(y > padY && y < padY + paddleWidth) {
+                dx = -dx;
+            }
+            else {
+                counter3--;
+                x = Math.random() * 20 + 50;
+                dx = -dx;
+            }
+        }
+        //right
+        else if(x + dx > canvas.width-ballRadius) {
+            if(y > paddleY && y < paddleY + paddleWidth) {
+                dx = -dx;
+            }
+            else {
+                counter4--;
+                x = Math.random() * 20 + 410;
+                dx = -dx;
+            }
+        }
+        
+        if(counter1 == 0){
+            alert("GAME OVER, YOU LOST");
+            document.location.reload();
+            clearInterval(interval);
+        }
+        else if(counter2 == 0 || counter3 == 0 || counter4 == 0){
+            alert("GAME OVER, YOU WON");
+            document.location.reload();
+            clearInterval(interval);
+        }
+        if(rightPressed) {
+            padX += 1;
+            if (padX + paddleWidth > canvas.width){
+                padX = canvas.width - paddleWidth;
+            }
+        }
+        else if(leftPressed) {
+            padX -= 1;
+            if (padX < 0){
+                padX = 0;
+            }
+        }
+        if(x > paddleX+paddleWidth/2){
+            paddleX += 0.9;
+        }
+        else if(x < paddleX+paddleWidth/2){
+            paddleX -= 0.9;
+        }
+        if(y > paddleY+paddleWidth/2){
+            paddleY += 0.8;
+            padY +=0.8;
+        }
+        else if(y < paddleY+paddleWidth/2){
+            paddleY -= 0.8;
+            padY -= 0.8;
+        }
+    }
+setInterval(draw, 10);
+</script>
+    <p>
+    Use left and right arrow keys to move the bottom paddle in order to hit the ball. Don't let it go past you and hit the wall or else you lose a life.
+    </p>
+
+</body>
+</html>
+
+
+<!--
+FUNCTIONS NOT USED
+//    function hitRight(){
+//        if(x + dx > canvas.height-ballRadius) {
+//            if(y > paddleY && y < paddleY + paddleWidth) {
+//                dx = -dx;
+//            }
+//            else {
+//                alert("GAME OVER");
+//                document.location.reload();
+//                clearInterval(interval);
+//            }
+//        }
+//    }
+//    function hitLeft(){
+//        if(x + dx < ballRadius) {
+//            if(y > padY && y < padY + paddleWidth) {
+//                dx = -dx;
+//            }
+//            else {
+//                alert("GAME OVER");
+//                document.location.reload();
+//                clearInterval(interval);
+//            }
+//        }
+//    }
+//    function hitBottom(){
+//        if(y + dy < ballRadius) {
+//            if(x > padX && x < padX + paddleWidth) {
+//                dy = -dy;
+//            }
+//            else {
+//                alert("GAME OVER");
+//                document.location.reload();
+//                clearInterval(interval);
+//            }
+//        }
+//    }
+//    function hitTop(){
+//        if(y + dy > canvas.height-ballRadius) {
+//            if(x > paddleX && x < paddleX + paddleWidth) {
+//                dy = -dy;
+//            }
+//            else {
+//                alert("GAME OVER");
+//                document.location.reload();
+//                clearInterval(interval);
+//            }
+//        }
+//    }
+-->
